@@ -4,6 +4,7 @@ const state = {
   selectedLessonIds: new Set(LESSONS.map((l) => l.id)),
   mode: "flip", // 'flip' | 'choice' | 'type'
   direction: "nl-en", // 'nl-en' | 'en-nl' | 'mixed'
+  order: "shuffled", // 'sequential' | 'shuffled'
   queue: [],
   index: 0,
   score: 0,
@@ -42,6 +43,7 @@ const selectAllBtn = document.getElementById("select-all-btn");
 const startBtn = document.getElementById("start-btn");
 const modeChips = document.querySelectorAll("[data-mode]");
 const dirChips = document.querySelectorAll("[data-dir]");
+const orderChips = document.querySelectorAll("[data-order]");
 
 function renderLessonList() {
   lessonListEl.innerHTML = "";
@@ -91,6 +93,15 @@ dirChips.forEach((chip) => {
   });
 });
 
+orderChips.forEach((chip) => {
+  chip.addEventListener("click", () => {
+    orderChips.forEach((c) => c.classList.remove("active"));
+    chip.classList.add("active");
+    state.order = chip.dataset.order;
+    startBtn.textContent = state.order === "sequential" ? "Start learning" : "Start quiz";
+  });
+});
+
 startBtn.addEventListener("click", startQuiz);
 
 // ---------- Quiz flow ----------
@@ -106,7 +117,7 @@ function shuffle(arr) {
 
 function buildQueue() {
   const words = LESSONS.filter((l) => state.selectedLessonIds.has(l.id)).flatMap((l) => l.words);
-  return shuffle(words);
+  return state.order === "sequential" ? words.slice() : shuffle(words);
 }
 
 function pickDirectionForCard() {
@@ -165,13 +176,16 @@ function renderCard() {
     const cardEl = document.getElementById("flip-card");
     const buttonsEl = document.getElementById("flip-buttons");
     cardEl.addEventListener("click", () => {
-      if (cardEl.classList.contains("flipped")) return;
-      cardEl.classList.add("flipped");
-      cardEl.addEventListener(
-        "transitionend",
-        () => buttonsEl.classList.add("visible"),
-        { once: true }
-      );
+      const flippingToBack = !cardEl.classList.contains("flipped");
+      cardEl.classList.toggle("flipped");
+      buttonsEl.classList.remove("visible");
+      if (flippingToBack) {
+        cardEl.addEventListener(
+          "transitionend",
+          () => buttonsEl.classList.add("visible"),
+          { once: true }
+        );
+      }
     });
     document.getElementById("flip-right").addEventListener("click", () => submitFlip(true));
     document.getElementById("flip-wrong").addEventListener("click", () => submitFlip(false));
