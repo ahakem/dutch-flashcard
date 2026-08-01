@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dutch Flashcards</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <h1><span class="flag"><div class="r"></div><div class="w"></div><div class="b"></div></span>Dutch Flashcards</h1>
+      <p>Pick your lessons, pick a mode, and quiz yourself.</p>
+    </header>
+
+    <!-- SETUP SCREEN -->
+    <div class="screen active" id="screen-setup">
+      <div class="panel">
+        <div class="select-all-row">
+          <button id="select-all-btn">Select / deselect all</button>
+        </div>
+        <div class="lesson-list" id="lesson-list"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section-label">Mode</div>
+        <div class="option-group">
+          <button class="chip active" data-mode="flip">Flip cards</button>
+          <button class="chip" data-mode="choice">Multiple choice</button>
+          <button class="chip" data-mode="type">Type the answer</button>
+        </div>
+
+        <div class="section-label">Direction</div>
+        <div class="option-group">
+          <button class="chip active" data-dir="nl-en">Dutch → English</button>
+          <button class="chip" data-dir="en-nl">English → Dutch</button>
+          <button class="chip" data-dir="mixed">Mixed</button>
+        </div>
+
+        <button class="btn btn-primary" id="start-btn">Start quiz</button>
+      </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div class="screen" id="screen-quiz">
+      <div class="panel">
+        <div class="top-actions">
+          <button id="quit-btn">← Back to setup</button>
+        </div>
+        <div class="quiz-header">
+          <span id="quiz-position"></span>
+          <span id="quiz-score"></span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        <div id="quiz-body"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="screen" id="screen-results">
+      <div class="panel">
+        <h2>Round complete</h2>
+        <div class="results-score">
+          <div class="big" id="results-big"></div>
+          <div class="sub" id="results-sub"></div>
+        </div>
+        <div class="section-label">Words to review</div>
+        <ul class="missed-list" id="missed-list"></ul>
+        <div class="results-actions">
+          <button class="btn btn-ghost" id="restart-btn">Choose lessons</button>
+          <button class="btn btn-primary" style="margin:0;" id="retry-missed-btn">Retry missed words</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>Add new lessons any time by editing <code>lessons.js</code>.</footer>
+  </div>
+
+  <script src="lessons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
