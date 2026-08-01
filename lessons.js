@@ -248,8 +248,7 @@ const LESSONS = [
       { nl: "de oefening", en: "the exercise" },
       { nl: "jarig zijn", en: "to have a birthday" },
       { nl: "plat", en: "flat" },
-      { nl: "hoe", en: "how" },
-      { nl: "heten", en: "to be called / named" },
+      { nl: "hoe heten", en: "how ... called (e.g. Hoe heet jij? = What are you called?)" },
 
       // A phone call
       { nl: "bellen", en: "to call" },
