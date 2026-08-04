@@ -14,6 +14,77 @@ const state = {
 
 const STORAGE_KEY = "dutch-flashcards-progress-v1";
 
+// ---------- Text-to-speech ----------
+
+const LANG_CODE = { Dutch: "nl-NL", English: "en-US" };
+
+// Names of known-good voices, checked in order, per language.
+const PREFERRED_VOICE_NAMES = {
+  "nl-NL": ["Google Nederlands", "Xander", "Ellen"],
+  "en-US": ["Google US English", "Samantha", "Alex"],
+};
+
+// OS "novelty" voices (Albert, Bad News, Zarvox, etc.) that read text in a
+// joke voice rather than a normal one — never pick these automatically.
+const NOVELTY_VOICE_RE = /^(Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Jester|Junior|Kathy|Organ|Pipe Organ|Princess|Ralph|Rocko|Superstar|Trinoids|Whisper|Wobble|Zarvox)/i;
+
+let cachedVoices = [];
+function refreshVoices() {
+  cachedVoices = window.speechSynthesis.getVoices();
+}
+if ("speechSynthesis" in window) {
+  refreshVoices();
+  window.speechSynthesis.onvoiceschanged = refreshVoices;
+}
+
+function pickVoice(lang) {
+  if (!cachedVoices.length) refreshVoices();
+  for (const name of PREFERRED_VOICE_NAMES[lang] || []) {
+    const match = cachedVoices.find((v) => v.name === name && v.lang === lang);
+    if (match) return match;
+  }
+  const prefix = lang.split("-")[0];
+  const exact = cachedVoices.filter((v) => v.lang === lang && !NOVELTY_VOICE_RE.test(v.name));
+  if (exact.length) return exact[0];
+  const anyPrefix = cachedVoices.filter((v) => v.lang.toLowerCase().startsWith(prefix) && !NOVELTY_VOICE_RE.test(v.name));
+  return anyPrefix[0] || null;
+}
+
+function speak(text, lang) {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = lang;
+  const voice = pickVoice(lang);
+  if (voice) utterance.voice = voice;
+  window.speechSynthesis.speak(utterance);
+}
+
+// Builds a text label with an inline speaker button that reads it aloud
+// in the given language. Used anywhere a Dutch or English word is shown.
+function wordWithSpeaker(text, lang, labelClass) {
+  const wrap = document.createElement("span");
+  wrap.className = "word-with-speaker";
+
+  const label = document.createElement("span");
+  if (labelClass) label.className = labelClass;
+  label.textContent = text;
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "speak-btn";
+  btn.setAttribute("aria-label", `Play pronunciation (${lang})`);
+  btn.textContent = "🔊";
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    speak(text, lang);
+  });
+
+  wrap.appendChild(label);
+  wrap.appendChild(btn);
+  return wrap;
+}
+
 function loadProgress() {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -167,12 +238,22 @@ function renderCard() {
             <div class="answer">${back}</div>
           </div>
         </div>
+        <button class="speak-overlay front" id="speak-front" type="button" aria-label="Play pronunciation (${askLang})">🔊</button>
+        <button class="speak-overlay back" id="speak-back" type="button" aria-label="Play pronunciation (${answerLang})">🔊</button>
       </div>
       <div class="flip-actions" id="flip-buttons">
         <button class="btn btn-bad" id="flip-wrong">I didn't know it</button>
         <button class="btn btn-good" id="flip-right">I knew it</button>
       </div>
     `;
+    document.getElementById("speak-front").addEventListener("click", (e) => {
+      e.stopPropagation();
+      speak(asking, LANG_CODE[askLang]);
+    });
+    document.getElementById("speak-back").addEventListener("click", (e) => {
+      e.stopPropagation();
+      speak(back, LANG_CODE[answerLang]);
+    });
     const cardEl = document.getElementById("flip-card");
     const buttonsEl = document.getElementById("flip-buttons");
     cardEl.addEventListener("click", () => {
@@ -201,10 +282,11 @@ function renderCard() {
     body.innerHTML = `
       <div class="card" style="cursor:default; min-height:auto; padding:36px 24px;">
         <div class="hint">${askLang} → ${answerLang}</div>
-        <div class="prompt">${asking}</div>
+        <div class="prompt" id="prompt-ask"></div>
       </div>
       <div class="choices" id="choices"></div>
     `;
+    document.getElementById("prompt-ask").appendChild(wordWithSpeaker(asking, LANG_CODE[askLang]));
     const choicesEl = document.getElementById("choices");
     choices.forEach((choice) => {
       const btn = document.createElement("button");
@@ -226,7 +308,7 @@ function renderCard() {
     body.innerHTML = `
       <div class="card" style="cursor:default; min-height:auto; padding:36px 24px;">
         <div class="hint">${askLang} → ${answerLang}. Type the translation.</div>
-        <div class="prompt">${asking}</div>
+        <div class="prompt" id="prompt-ask"></div>
       </div>
       <div class="type-row">
         <input type="text" id="type-input" autocomplete="off" placeholder="Type here...">
@@ -234,6 +316,7 @@ function renderCard() {
       </div>
       <div class="type-feedback" id="type-feedback"></div>
     `;
+    document.getElementById("prompt-ask").appendChild(wordWithSpeaker(asking, LANG_CODE[askLang]));
     const input = document.getElementById("type-input");
     const feedback = document.getElementById("type-feedback");
     const submit = document.getElementById("type-submit");
@@ -298,7 +381,8 @@ function showResults() {
   } else {
     state.missed.forEach((w) => {
       const li = document.createElement("li");
-      li.innerHTML = `<span class="nl">${w.nl}</span><span>${w.en}</span>`;
+      li.appendChild(wordWithSpeaker(w.nl, LANG_CODE.Dutch, "nl"));
+      li.appendChild(wordWithSpeaker(w.en, LANG_CODE.English));
       missedEl.appendChild(li);
     });
   }

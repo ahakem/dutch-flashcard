@@ -226,6 +226,7 @@ h2 {
 }
 
 .flip-scene {
+  position: relative;
   perspective: 1400px;
 }
 .flip-card {
@@ -336,6 +337,52 @@ h2 {
   font-size: 0.92rem;
 }
 .missed-list .nl { font-weight: 600; }
+
+.word-with-speaker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.speak-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 6px;
+  opacity: 0.6;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.speak-btn:hover { opacity: 1; }
+.speak-btn:active { transform: scale(0.9); }
+.missed-list .speak-btn { font-size: 0.95rem; }
+
+/* Flip-card speaker buttons live outside the rotating .flip-card so the
+   hover-tilt on the card never shifts them under the cursor. Only the
+   button matching the currently-shown face is visible. */
+.speak-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  font-size: 1.15rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  opacity: 0.9;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.speak-overlay:hover { opacity: 1; }
+.speak-overlay:active { transform: scale(0.92); }
+.flip-card.flipped ~ .speak-overlay.front { display: none; }
+.flip-card:not(.flipped) ~ .speak-overlay.back { display: none; }
 
 .results-actions {
   display: flex;
