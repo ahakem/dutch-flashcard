@@ -231,10 +231,12 @@ function renderCard() {
         <div class="flip-card" id="flip-card">
           <div class="card flip-face flip-front">
             <div class="hint">${askLang} → ${answerLang}. Tap to flip.</div>
+            ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
             <div class="prompt">${asking}</div>
           </div>
           <div class="card flip-face flip-back">
             <div class="hint">How did you do?</div>
+            ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
             <div class="answer">${back}</div>
           </div>
         </div>
@@ -282,6 +284,7 @@ function renderCard() {
     body.innerHTML = `
       <div class="card" style="cursor:default; min-height:auto; padding:36px 24px;">
         <div class="hint">${askLang} → ${answerLang}</div>
+        ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
         <div class="prompt" id="prompt-ask"></div>
       </div>
       <div class="choices" id="choices"></div>
@@ -308,6 +311,7 @@ function renderCard() {
     body.innerHTML = `
       <div class="card" style="cursor:default; min-height:auto; padding:36px 24px;">
         <div class="hint">${askLang} → ${answerLang}. Type the translation.</div>
+        ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
         <div class="prompt" id="prompt-ask"></div>
       </div>
       <div class="type-row">
@@ -381,8 +385,17 @@ function showResults() {
   } else {
     state.missed.forEach((w) => {
       const li = document.createElement("li");
-      li.appendChild(wordWithSpeaker(w.nl, LANG_CODE.Dutch, "nl"));
-      li.appendChild(wordWithSpeaker(w.en, LANG_CODE.English));
+      if (w.icon) {
+        const icon = document.createElement("span");
+        icon.className = "missed-icon";
+        icon.textContent = w.icon;
+        li.appendChild(icon);
+      }
+      const words = document.createElement("div");
+      words.className = "missed-words";
+      words.appendChild(wordWithSpeaker(w.nl, LANG_CODE.Dutch, "nl"));
+      words.appendChild(wordWithSpeaker(w.en, LANG_CODE.English));
+      li.appendChild(words);
       missedEl.appendChild(li);
     });
   }
