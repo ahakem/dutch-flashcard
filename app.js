@@ -62,6 +62,16 @@ function speak(text, lang) {
 
 // Builds a text label with an inline speaker button that reads it aloud
 // in the given language. Used anywhere a Dutch or English word is shown.
+// Wraps the nl word inside a phrase with a highlight span for visual emphasis.
+function highlightPhrase(phrase, nlWord) {
+  // Try to match the full nl value first; fall back to the core word without article.
+  let core = nlWord.split(" / ")[0].trim();
+  core = core.replace(/^(de |het |een )/, "").trim();
+  if (!core) return phrase;
+  const escaped = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return phrase.replace(new RegExp(`(${escaped})`, "gi"), '<span class="phrase-hl">$1</span>');
+}
+
 function wordWithSpeaker(text, lang, labelClass) {
   const wrap = document.createElement("span");
   wrap.className = "word-with-speaker";
@@ -224,8 +234,35 @@ function renderCard() {
   const body = document.getElementById("quiz-body");
   body.innerHTML = "";
 
-  if (state.mode === "flip") {
+  if (state.mode === "both") {
+    const nlWord = word.nl;
+    const enWord = word.en;
+    const phraseHtml = word.phrase
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, nlWord)}</div>` : "";
+    body.innerHTML = `
+      <div class="both-card card" style="cursor:default;">
+        ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
+        <div class="both-nl" id="both-nl"></div>
+        <div class="both-sep"></div>
+        <div class="both-en" id="both-en"></div>
+        ${phraseHtml}
+      </div>
+      <div class="flip-actions visible" style="margin-top:16px;">
+        <button class="btn btn-bad" id="flip-wrong">Still learning</button>
+        <button class="btn btn-good" id="flip-right">Got it</button>
+      </div>
+    `;
+    document.getElementById("both-nl").appendChild(wordWithSpeaker(nlWord, LANG_CODE.Dutch, "both-nl-text"));
+    document.getElementById("both-en").appendChild(wordWithSpeaker(enWord, LANG_CODE.English));
+    document.getElementById("flip-right").addEventListener("click", () => submitFlip(true));
+    document.getElementById("flip-wrong").addEventListener("click", () => submitFlip(false));
+  } else if (state.mode === "flip") {
     const back = state.currentCardDirection === "nl-en" ? word.en : word.nl;
+    const frontIsNl = state.currentCardDirection === "nl-en";
+    const frontPhrase = frontIsNl && word.phrase
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}</div>` : "";
+    const backPhrase = !frontIsNl && word.phrase
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}</div>` : "";
     body.innerHTML = `
       <div class="flip-scene">
         <div class="flip-card" id="flip-card">
@@ -233,11 +270,13 @@ function renderCard() {
             <div class="hint">${askLang} → ${answerLang}. Tap to flip.</div>
             ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
             <div class="prompt">${asking}</div>
+            ${frontPhrase}
           </div>
           <div class="card flip-face flip-back">
             <div class="hint">How did you do?</div>
             ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
             <div class="answer">${back}</div>
+            ${backPhrase}
           </div>
         </div>
         <button class="speak-overlay front" id="speak-front" type="button" aria-label="Play pronunciation (${askLang})">🔊</button>

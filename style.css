@@ -229,6 +229,43 @@ h2 {
   line-height: 1;
 }
 
+/* Example phrase shown below the main word on flash cards */
+.card-phrase {
+  font-size: 0.92rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.phrase-hl {
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 600;
+  background: rgba(200, 67, 58, 0.08);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+
+/* Both-sides card — shows Dutch and English at the same time */
+.both-card { gap: 6px; padding: 32px 24px; }
+.both-nl-text {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.both-en {
+  font-size: 1.15rem;
+  color: var(--blue);
+  font-weight: 500;
+}
+.both-sep {
+  width: 40px;
+  height: 2px;
+  background: var(--line);
+  border-radius: 1px;
+  margin: 4px auto;
+}
+
 .flip-scene {
   position: relative;
   perspective: 1400px;
