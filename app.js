@@ -238,7 +238,7 @@ function renderCard() {
     const nlWord = word.nl;
     const enWord = word.en;
     const phraseHtml = word.phrase
-      ? `<div class="card-phrase">${highlightPhrase(word.phrase, nlWord)}</div>` : "";
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, nlWord)}${word.phraseEn ? `<div class="card-phrase-en">${word.phraseEn}</div>` : ""}</div>` : "";
     body.innerHTML = `
       <div class="both-card card" style="cursor:default;">
         ${word.icon ? `<div class="card-icon">${word.icon}</div>` : ""}
@@ -260,9 +260,9 @@ function renderCard() {
     const back = state.currentCardDirection === "nl-en" ? word.en : word.nl;
     const frontIsNl = state.currentCardDirection === "nl-en";
     const frontPhrase = frontIsNl && word.phrase
-      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}</div>` : "";
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}${word.phraseEn ? `<div class="card-phrase-en">${word.phraseEn}</div>` : ""}</div>` : "";
     const backPhrase = !frontIsNl && word.phrase
-      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}</div>` : "";
+      ? `<div class="card-phrase">${highlightPhrase(word.phrase, word.nl)}${word.phraseEn ? `<div class="card-phrase-en">${word.phraseEn}</div>` : ""}</div>` : "";
     body.innerHTML = `
       <div class="flip-scene">
         <div class="flip-card" id="flip-card">

@@ -245,6 +245,13 @@ h2 {
   border-radius: 4px;
   padding: 0 3px;
 }
+.card-phrase-en {
+  font-size: 0.82rem;
+  color: var(--blue);
+  font-style: normal;
+  margin-top: 4px;
+  opacity: 0.75;
+}
 
 /* Both-sides card — shows Dutch and English at the same time */
 .both-card { gap: 6px; padding: 32px 24px; }
